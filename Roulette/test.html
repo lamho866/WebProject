@@ -1,0 +1,51 @@
+<html>
+<head>
+
+</head>
+<body>
+    <button onclick="createCell(event)">Try It</button>
+    <script>
+        
+        function createCell(event) {
+            var x = event.clientX;
+            var y = event.clientY;
+            var cell = document.createElement("div");
+            cell.style.backgroundImage = "url(1cellMoney.png)";
+            cell.style.position = "absolute";
+            cell.style.left = x - 8;
+            cell.style.top = y - 8;
+            cell.style.width = 35;
+            cell.style.height = 35;
+            cell.style.zIndex = "2";
+            cell.onmousemove = move;
+            cell.onclick = change;
+            cell.className = "canMove";
+            document.body.appendChild(cell);
+        }
+        function move(event) {
+            if ((typeof event == "undefined") || (!event))
+                event = window.event;
+            var e1 = event.target || event.srcElement;
+            if (e1.className == "canMove") {
+
+                e1.style.left = event.clientX - 8;
+                e1.style.top = event.clientY - 8;
+            }
+        }
+        function change(event) {
+            if ((typeof event == "undefined") || (!event))
+                event = window.event;
+            var e1 = event.target || event.srcElement;
+            if (e1.className == "canMove") {
+                e1.className = "canNotMove";
+                e1.style.zIndex = "1"
+            }
+            else {
+                e1.className = "canMove";
+                e1.style.zIndex = "2";
+            }
+        }
+        
+    </script>
+</body>
+</html>

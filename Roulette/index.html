@@ -1,0 +1,492 @@
+<html>
+<head>
+    <style>
+        body {
+            background-image: radial-gradient(#00b300,#006600);
+        }
+
+        #roulette {
+            background-image: url("rouletteImg.png");
+            width: 386px;
+            height: 386px;
+            transform: rotate(0);
+            position:absolute;
+        }
+        #ball {
+            background-image: url("ball.png");
+            width: 386px;
+            height: 386px;
+            transform: rotate(0);
+            position:absolute;
+            z-index:1;
+        }
+        tr {
+            font-size: 40px;
+            vertical-align: central;
+            text-align: center;
+        }
+
+        table, td {
+            border-collapse: collapse;
+            border: 3px solid #ddd;
+        }
+
+        button {
+            background-color: #ffaa00;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            font-size: 16px;
+            margin: 4px 2px;
+        }
+    </style>
+</head>
+<body onload="initial();">
+    <div id="check" style="position:absolute;left:1100px;color:white;font-size:40px;"></div>
+    <div id="ball"></div>
+    <div id="roulette"></div>
+    <table style="width:975px;position:absolute;top:260px;left:600px">
+        <tr>
+            <td colspan="2"  id="1to12" class="">1 to 12</td>
+            <td colspan="2"  id="13to24" class="">13 to 24</td>
+            <td colspan="2"  id="25to36" class="">25 to 36</td>
+        </tr>
+        <tr>
+            <td style="width:150px;"  id="small" class="">1 to 18</td>
+            <td style="width:150px;"  id="even" class="">EVEN</td>
+            <td style="background-color:red;color:white;width:150px;"  id="red" class="">RED</td>
+            <td style="background-color:black;color:white;width:150px;"  id="black" class="">BLACK</td>
+            <td style="width:150px;" id="odd" class="">ODD</td>
+            <td style="width:150px;" id="big" class="">19 to 36</td>
+        </tr>
+    </table>
+    <table style="position:absolute;top:100px;left:1500px;width:200px;height:152px;">
+        <tr>
+            <td id="rdrow" style="font-size:30px;background-color:#339966;color:white" onclick="specialChoise('rdrow')">3RD ROW</td>
+        </tr>
+        <tr>
+            <td id="ndrow" style="font-size:30px;background-color:#339966;color:white" onclick="specialChoise('ndrow')">2ND ROW</td>
+        </tr>
+        <tr>
+            <td id="strow" style="font-size:30px;background-color:#339966;color:white" onclick="specialChoise('strow')">1ST ROW</td>
+        </tr>
+    </table>
+
+    <table style="position:absolute;top:400px;left:800px;">
+        <tr>
+            <td  style="color:white" onclick="SE(1)"><img id="$1" src="1cell.png"></td>
+            <td  style="color:white" onclick="SE(10)"><img id="$10" src="10cell.png"></td>
+            <td  style="color:white" onclick="SE(25)"><img id="$25" src="25cell.png"></td>
+            <td  style="color:white" onclick="SE(50)"><img id="$50" src="50cell.png"></td>
+            <td  style="color:white" onclick="SE(100)"><img id="$100" src="100cell.png"></td>
+            <td  style="color:white" onclick="SE(1000)"><img id="$1000" src="1000cell.png"></td>
+        </tr>
+    </table>
+    <button id="start" style="position:absolute;top:500px;left:30px;font-size:40px;" onclick="rouletteStart();">Start Game</button>
+    <div id="showNumber" style="border:3px solid #ddd;position:absolute;font-size:50px;top:10px;left:400px;width:100px;height:50px;color:#ddd;padding:5px;color:white;text-align:center"></div>
+    <div id="playerMoney" style="border:3px solid #ddd;position:absolute;font-size:30px;top:10px;left:600px;width:300px;height:50px;color:#ddd">1000</div>
+
+    <div id="0" style="position:absolute;left:480px;top:100px;width:70px;height:96px;font-size:40px;text-align:center;border:3px solid #ddd;padding-top:50px;background-color:#66ff66;color:white">0</div>
+    <div id="currentChoice" style="position:absolute;top:500px;left:450px;width:300px;height:auto;background-color:#ffbb80;border: 3px solid #cc6600;text-align:center;font-size:20px;">Current Choice</div>
+    <script>
+
+        /*-----------------------------data part--------------------------------------------------------------------*/
+        //circle
+        var deg = 360 / 37;
+        var totalDeg = 0;
+        var rouletteNum = [0, 26, 3, 35, 12, 28, 7, 29, 18, 22, 9, 31, 14, 20, 11, 33, 16, 24, 5, 10, 23, 8, 30, 11, 36, 13, 27, 6, 34, 17, 25, 2, 21, 4, 19, 15, 32];
+        var addNum = 0;
+        var ballNum = 0;
+        var ballDeg = 360;
+        var circleTurn = false;
+        //win condition
+        var NumColor = [];
+        NumColor[0] = "#66ff66";
+        var countRed = 0, countBlack = 0;
+        var StopNum = false;
+        //money
+        var m = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var big = 0, small = 0, row1 = 0, row2 = 0, row3 = 0, col01 = 0, col02 = 0, col03 = 0, redCell = 0, blackCell = 0, even = 0, odd = 0;
+        var m2 = 1;
+        var Color = "#999999";
+        var playerM = 1000;
+        //Coin id Num
+        var coin = 0;
+        //click
+        var playerOn = true;
+
+        /*------------------------------pg part-------------------------------------------------------------------*/
+        function initial() {
+            var table = document.createElement("table");
+            NumColor[0] = "#66ff66";
+            document.body.appendChild(table);
+            table.style.position = "absolute";
+            table.style.left = 550;
+            table.style.top = 100;
+            var x, y, num = 3;
+            for (x = 0; x < 3; x++) {
+                r = table.insertRow(x);
+                for (y = 0; y <= 11; y++) {
+                    var c = r.insertCell(y);
+                    c.width = 75;
+                    c.height = 50;
+                    c.style.color = "white";
+                    c.style.fontSize = 30;
+                    c.vAlign = "center";
+                    c.align = "center";
+                    c.id = num + 3 * y;
+                    c.className = "";
+
+                    var testpoint = parseInt(c.id);
+
+                    if (testpoint == 11 || testpoint == 26 || testpoint == 28) {
+                        c.style.backgroundColor = "black";
+                        NumColor[testpoint] = "black";
+
+                        countBlack++;
+                    }
+                    else if (testpoint == 12 || testpoint == 27 || testpoint == 25) {
+                        c.style.backgroundColor = "red";
+                        NumColor[testpoint] = "red";
+
+                        countRed++;
+                    }
+                    else if (parseInt(c.id) % 2 == 1 && testpoint <= 12) {
+                        c.style.backgroundColor = "red";
+                        NumColor[testpoint] = "red";
+
+                        countRed++;
+                    }
+                    else if (parseInt(c.id) % 2 == 0 && testpoint <= 12) {
+                        c.style.backgroundColor = "black";
+                        NumColor[testpoint] = "black";
+
+                        countBlack++;
+                    }
+                    else if (parseInt(c.id) % 2 == 0 && testpoint <= 18) {
+                        c.style.backgroundColor = "red";
+                        NumColor[testpoint] = "red";
+
+                        countRed++;
+                    }
+                    else if (parseInt(c.id) % 2 == 1 && testpoint <= 18) {
+                        c.style.backgroundColor = "black";
+                        NumColor[testpoint] = "black";
+
+                        countBlack++;
+                    }
+                    else if (parseInt(c.id) % 2 == 1 && testpoint <= 24) {
+                        c.style.backgroundColor = "red";
+                        NumColor[testpoint] = "red";
+
+                        countRed++;
+                    }
+                    else if (parseInt(c.id) % 2 == 0 && testpoint <= 24) {
+                        c.style.backgroundColor = "black";
+                        NumColor[testpoint] = "black";
+
+                        countBlack++;
+                    }
+                    else if (parseInt(c.id) % 2 == 0 && testpoint <= 36) {
+                        c.style.backgroundColor = "red";
+                        NumColor[testpoint] = "red";
+
+                        countRed++;
+                    }
+                    else if (parseInt(c.id) % 2 == 1 && testpoint <= 36) {
+                        c.style.backgroundColor = "black";
+                        NumColor[testpoint] = "black";
+
+                        countBlack++;
+                    }
+                    c.appendChild(document.createTextNode(num + 3 * y));
+
+
+                }
+                num--;
+            }
+        }
+
+        var rotate = setInterval(change, 50);
+        clearInterval(rotate);
+        function rouletteStart() {
+            if (playerOn) {
+                playerOn = false;
+                var rotateTime = Math.floor(Math.random() * 5) * 100 + Math.floor(Math.random() * 5) + 100;
+                var ballTurn = rotate + Math.floor(Math.random() * 5) * 100+200;
+                var nowTime = 0;
+                rotate = setInterval(change, 50);
+                var turnImg = setInterval(turn, 50);
+                StopNum = false;
+                circleTurn = true;
+                function turn() {
+                    if (nowTime >= ballTurn) {
+                        clearInterval(turnImg);
+                        StopNum = true;
+                    } else {
+                        nowTime += 10;
+                    }
+                    if (nowTime >= rotateTime && circleTurn) {
+                        circleTurn = false;
+                    }
+                }
+            }
+        }
+
+        function checkWin(num) {
+            var text = "Current Choice"+"<br>";
+            for (var i = 0; i <= coin; i++) {
+                var coinId = document.getElementById("coin" + i);
+                if (coinId == null) continue;
+                //check single bock
+                var coinX = parseInt(coinId.style.left) + 17.5;
+                var coinY = parseInt(coinId.style.top) + 17.5;
+                if (coinX - 550 >= 0 && coinX < 1510 && coinY - 100 > 0 && coinY < 250) {
+                    var thisCoinNum = Math.floor((coinX - 550) / 78) + 1;
+                    thisCoinNum = thisCoinNum * 3 - Math.floor((coinY - 100) / 50);
+                    if (thisCoinNum == num) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    }
+                    m[thisCoinNum] += parseInt(coinId.style.fontSize);
+                } else if (coinX >= 480 && coinX <= 553 && coinY >= 100 && coinY <= 251) {
+                    if (num == 0) {
+                        playerM += parseInt(coinId.style.fontSize) * 3;
+                    }
+                    m[0] += parseInt(coinId.style.fontSize);
+                } else if (coinX >= 1500 && coinX <= 1700 && coinY >= 100 && coinY <= 264) {
+                    var rowNum = Math.floor((coinY - 100) / 55);
+                    if (rowNum == 2) rowNum = 1;
+                    else if (rowNum == 1) rowNum = 2;
+                    if (rowNum == num % 3) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    }
+                    if (rowNum == 1) row1 += parseInt(coinId.style.fontSize);
+                    if (rowNum == 2) row2 += parseInt(coinId.style.fontSize);
+                    if (rowNum == 0) row3 += parseInt(coinId.style.fontSize);
+
+
+                } else if (coinY >= 260 && coinY <= 312 && coinX >= 600 && coinX <= 1587) {
+                    var whichColoumn = Math.floor(parseInt(coinX - 600) / 329);
+                    if (num >= 1 && num <= 18 && whichColoumn == 0) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    } else if (num >= 13 && num <= 24 && whichColoumn == 1) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    } else if (num >= 25 && num <= 36 && whichColoumn == 2) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    }
+
+                    if (whichColoumn == 0) {
+                        col01 += parseInt(coinId.style.fontSize);
+                    } else if (whichColoumn == 1 ) {
+                        col02 += parseInt(coinId.style.fontSize);
+                    } else if (whichColoumn == 2) {
+                        col03 += parseInt(coinId.style.fontSize);
+                    }
+
+                } else if (coinY >= 312 && coinY <= 364 && coinX >= 600 && coinX <= 1587) {
+                    var whichColoumn02 = Math.floor(parseInt(coinX - 600) / 162.5);
+                    if (num >= 1 && num <= 18 && whichColoumn02 == 0) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    } else if (num % 2 == 0 && whichColoumn02 == 1) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    } else if (NumColor[num] == "red" && whichColoumn02 == 2) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    } else if (NumColor[num] == "black" && whichColoumn02 == 3) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    } else if (num % 2 == 1 && whichColoumn02 == 4) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    } else if (num >= 19 && num <= 36 && whichColoumn02 == 5) {
+                        playerM += parseInt(coinId.style.fontSize) * 2;
+                    }
+
+                    if (whichColoumn02 == 0) small += parseInt(coinId.style.fontSize);
+                    else if (whichColoumn02 == 1) even += parseInt(coinId.style.fontSize);
+                    else if (whichColoumn02 == 2) redCell += parseInt(coinId.style.fontSize);
+                    else if (whichColoumn02 == 3) blackCell += parseInt(coinId.style.fontSize);
+                    else if (whichColoumn02 == 4) odd += parseInt(coinId.style.fontSize);
+                    else if (whichColoumn02 == 5) big += parseInt(coinId.style.fontSize);
+                }
+                
+                document.body.removeChild(coinId);
+            }
+            for (var i = 0; i < 37; i++) {
+                if (m[i] != 0) {
+                    text += "You choice amount of " + i + "are : " + m[i] + "<br>";
+                    m[i] = 0;
+                }
+            }
+            if (row1 != 0) {
+                text += "You choice amount of 1st row  are: " + row1 + "<br>";
+                row1 = 0;
+            }
+            if (row2 != 0) {
+                text += "You choice amount of 2nd row are: " + row2 + "<br>";
+                row2 = 0;
+            }
+            if (row3 != 0) {
+                text += "You choice amount of 3rd row are: " + row3 + "<br>";
+                row3 = 0;
+            }
+            if (col01 != 0) {
+                text += "You choice amount of 1 to 12 are: " + col01 + "<br>";
+                col01 = 0;
+            }
+            if (col02 != 0) {
+                text += "You choice amount of 13 to 24 are: " + col02 + "<br>";
+                col02 = 0;
+            }
+            if (col03 != 0) {
+                text += "You choice amount of 25 to 36 are: " + col03 + "<br>";
+                col03 = 0;
+            }
+            if (redCell != 0) {
+                text += "You choice amount of red are: " + redCell + "<br>";
+                redCell = 0;
+            }
+            if (blackCell != 0) {
+                text += "You choice amount of black are: " + blackCell + "<br>";
+                blackCell = 0;
+            }
+            if (even != 0) {
+                text += "You choice amount of even are: " + even + "<br>";
+                even = 0;
+            }
+            if (odd != 0) {
+                text += "You choice amount of odd are: " + odd + "<br>";
+                odd = 0;
+            }
+            if (big != 0) {
+                text += "You choice amount of 19 to 36 are: " + big + "<br>";
+                big = 0;
+            }
+            if (small != 0) {
+                text += "You choice amount of 1 to 18 are: " + small + "<br>";
+                small = 0;
+            }
+            coin = 0;
+            document.getElementById("currentChoice").innerHTML = text;
+            document.getElementById("playerMoney").innerHTML = playerM;
+            playerOn = true;
+        }
+
+        function change() {
+            var circle = document.getElementById("roulette");
+            var ballTurn = document.getElementById("ball");
+            ballDeg -= deg;
+            ballTurn.style.transform = "rotate(" + ballDeg + "deg)";
+            --ballNum;
+            if (circleTurn) {
+                totalDeg += deg;
+                circle.style.transform = "rotate(" + totalDeg + "deg)";
+                ++addNum;
+            }
+            if (totalDeg >= 360) {
+                totalDeg = 0;
+                addNum = 0;
+            }
+            if (ballDeg <= 0) {
+                ballDeg = 360;
+                ballNum = 0;
+            }
+            if (StopNum) {
+                var nowNum = (addNum + Math.abs(ballNum))%37;
+                clearInterval(rotate);
+                document.getElementById("showNumber").innerHTML = rouletteNum[nowNum];
+                document.getElementById("showNumber").style.background = NumColor[rouletteNum[nowNum]];
+                checkWin(rouletteNum[nowNum]);
+                StopNum = false;
+            }
+        }
+
+        function SE(a) {
+            //var saveNum = a+"px";
+            createCell(event, "coin" + coin, a);
+            coin++;
+        }
+
+        function createCell(event, id01, money) {
+            if ((playerM - money) >= 0) {
+                var x = event.clientX;
+                var y = event.clientY;
+                var cell = document.createElement("div");
+                cell.style.backgroundImage = "url(" + money + "cellMoney.png)";
+                cell.style.position = "absolute";
+                cell.style.left = x - 16;
+                cell.style.top = y - 16;
+                cell.style.width = 35;
+                cell.style.height = 35;
+                cell.style.zIndex = "2";
+                cell.onmousemove = move;
+                cell.onclick = changePlace;
+                cell.className = "canMove";
+                cell.style.fontSize = money + "px";
+                cell.id = id01;
+                document.body.appendChild(cell);
+                playerM -= money;
+                document.getElementById("playerMoney").innerHTML = playerM;
+            }
+        }
+        function move(event) {
+            if ((typeof event == "undefined") || (!event))
+                event = window.event;
+            var e1 = event.target || event.srcElement;
+            if (e1.className == "canMove") {
+
+                e1.style.left = event.clientX - 16;
+                e1.style.top = event.clientY - 16;
+            }
+        }
+        function changePlace(event) {
+            if ((typeof event == "undefined") || (!event))
+                event = window.event;
+            var e1 = event.target || event.srcElement;
+            if (e1.className == "canMove") {
+                e1.className = "canNotMove";
+                e1.style.zIndex = "1"
+                var thisCoinPositionX = parseInt(e1.style.left)+25;
+                var thisCoinPositionY = parseInt(e1.style.top)+25;
+
+                var check01 = (thisCoinPositionX >= 480 && thisCoinPositionX <= 1700 && thisCoinPositionY >= 100 && thisCoinPositionY <= 252);
+                var check02 = (thisCoinPositionX >= 600 && thisCoinPositionX <= 1574.22 && thisCoinPositionY >= 260 && thisCoinPositionY <= 364);
+
+                if (!check01 && !check02) {
+                    playerM += parseInt(e1.style.fontSize);
+                    document.getElementById("playerMoney").innerHTML = playerM;
+                    document.body.removeChild(e1);
+                }
+
+            }
+            else {
+                e1.className = "canMove";
+                e1.style.zIndex = "2";
+            }
+        }
+
+        var checkEnough = window.setInterval(checkChoiceCoin, 1);
+
+        function checkChoiceCoin() {
+            if (playerM < 1000) document.getElementById("$1000").style.opacity = 0.2;
+            else document.getElementById("$1000").style.opacity = 1;
+
+            if(playerM < 100) document.getElementById("$100").style.opacity = 0.2;
+            else document.getElementById("$100").style.opacity = 1;
+
+            if(playerM < 50) document.getElementById("$50").style.opacity = 0.2;
+            else document.getElementById("$50").style.opacity = 1;
+
+            if (playerM < 25) document.getElementById("$25").style.opacity = 0.2;
+            else document.getElementById("$25").style.opacity = 1;
+
+            if (playerM < 10) document.getElementById("$10").style.opacity = 0.2;
+            else document.getElementById("$10").style.opacity = 1;
+
+            if (playerM < 1) document.getElementById("$1").style.opacity = 0.2;
+            else document.getElementById("$1").style.opacity = 1;
+        }
+
+    </script>
+</body>
+</html>
